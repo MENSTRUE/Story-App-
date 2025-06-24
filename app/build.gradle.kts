@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id ("kotlin-kapt") // For Room, Dagger/Hilt if used, or for @Parcelize
+    id ("kotlin-parcelize") // For Parcelable
 }
 
 android {
@@ -49,8 +51,35 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // DataStore (for session management)
     implementation(libs.androidx.datastore.preferences)
+
+    // Lifecycle (ViewModel & LiveData)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.activity.ktx)
+
+    // Retrofit for Networking
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor) // for logging network requests
+
+    // Kotlin Coroutines
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+
+    // Glide for image loading
+    implementation (libs.glide)
+    kapt ("com.github.bumptech.glide:compiler:4.16.0")
+
+    // CameraX (Opsional, jika ingin menambahkan fitur kamera)
+     implementation (libs.androidx.camera.camera2)
+     implementation (libs.androidx.camera.lifecycle)
+     implementation (libs.androidx.camera.view)
+
+    // Testing (optional, but good practice)
+    testImplementation (libs.junit)
+    androidTestImplementation (libs.androidx.junit)
+    androidTestImplementation (libs.androidx.espresso.core)
+
 }
