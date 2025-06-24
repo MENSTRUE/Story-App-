@@ -13,7 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.storyapp.data.pref.UserModel
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
-import com.dicoding.storyapp.view.ViewModelFactory
+import com.dicoding.storyapp.viewmodel.ViewModelFactory
 import com.dicoding.storyapp.view.main.MainActivity
 
 class LoginActivity : AppCompatActivity() {

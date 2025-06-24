@@ -1,4 +1,4 @@
-package com.dicoding.storyapp.di
+package com.dicoding.storyapp.data.di
 
 import android.content.Context
 import com.dicoding.storyapp.data.UserRepository

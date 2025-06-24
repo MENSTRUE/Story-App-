@@ -1,4 +1,4 @@
-package com.dicoding.storyapp.view.main
+package com.dicoding.storyapp.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

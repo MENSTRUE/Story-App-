@@ -1,12 +1,11 @@
-package com.dicoding.storyapp.view
+package com.dicoding.storyapp.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.data.UserRepository
-import com.dicoding.storyapp.di.Injection
+import com.dicoding.storyapp.data.di.Injection
 import com.dicoding.storyapp.view.login.LoginViewModel
-import com.dicoding.storyapp.view.main.MainViewModel
 
 class ViewModelFactory(private val repository: UserRepository) : ViewModelProvider.NewInstanceFactory() {
 
