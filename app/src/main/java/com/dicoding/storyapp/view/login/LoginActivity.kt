@@ -56,25 +56,37 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupAction() {
         binding.loginButton.setOnClickListener {
-            val email = binding.emailEditText.text.toString()
+            val email = binding.emailEditText.text.toString().trim()
             val password = binding.passwordEditText.text.toString()
+
+            var isValid = true
+
+            binding.emailEditText.error = null
+            binding.passwordEditText.error = null
 
             if (email.isEmpty()) {
                 binding.emailEditText.error = "Email tidak boleh kosong"
-            }
-            if (password.isEmpty()) {
-                binding.passwordEditText.error = "Password tidak boleh kosong"
+                isValid = false
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.emailEditText.error = "Format email tidak valid (contoh: user@example.com)"
+                isValid = false
             }
 
-            // Periksa apakah ada error dari Custom View atau input kosong
-            if (binding.emailEditText.error != null || binding.passwordEditText.error != null || email.isEmpty() || password.isEmpty()) {
+            if (password.isEmpty()) {
+                binding.passwordEditText.error = "Password tidak boleh kosong"
+                isValid = false
+            } else if (password.length < 8) {
+                binding.passwordEditText.error = "Password minimal 8 karakter"
+                isValid = false
+            }
+
+            if (!isValid) {
                 Toast.makeText(this, "Perbaiki kesalahan input sebelum login", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             authViewModel.login(email, password)
         }
-
 
         binding.root.findViewById<TextView>(R.id.registerText)?.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
@@ -95,7 +107,7 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is Result.Error -> {
                     showLoading(false)
-                    Toast.makeText(this, "Login gagal: ${result.error}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Login gagal: ${result.error}. Periksa email dan password Anda.", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -121,7 +133,6 @@ class LoginActivity : AppCompatActivity() {
         val passwordEditTextLayout = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(200)
         val loginButton = ObjectAnimator.ofFloat(binding.loginButton, View.ALPHA, 1f).setDuration(200)
         val registerText = ObjectAnimator.ofFloat(binding.root.findViewById<View>(R.id.registerText), View.ALPHA, 1f).setDuration(200)
-
 
         AnimatorSet().apply {
             playSequentially(

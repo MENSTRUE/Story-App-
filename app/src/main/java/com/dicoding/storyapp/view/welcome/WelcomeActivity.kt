@@ -9,13 +9,17 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.databinding.ActivityWelcomeBinding
 import com.dicoding.storyapp.view.login.LoginActivity
+import com.dicoding.storyapp.view.main.MainActivity
 import com.dicoding.storyapp.view.signup.SignupActivity
+import com.dicoding.storyapp.viewmodel.AuthViewModel
+import com.dicoding.storyapp.viewmodel.ViewModelFactory
 
 class WelcomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWelcomeBinding
-
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,8 +27,21 @@ class WelcomeActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupView()
-        setupAction()
-        playAnimation()
+
+        val factory = ViewModelFactory.getInstance(this)
+        authViewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
+
+        authViewModel.getSession().observe(this) { user ->
+            if (user.isLogin) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
+            } else {
+                setupAction()
+                playAnimation()
+            }
+        }
     }
 
     private fun playAnimation() {

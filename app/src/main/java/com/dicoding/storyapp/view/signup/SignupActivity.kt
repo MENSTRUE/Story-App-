@@ -51,21 +51,38 @@ class SignupActivity : AppCompatActivity() {
 
     private fun setupAction() {
         binding.signupButton.setOnClickListener {
-            val name = binding.nameEditText.text.toString()
-            val email = binding.emailEditText.text.toString()
+            val name = binding.nameEditText.text.toString().trim()
+            val email = binding.emailEditText.text.toString().trim()
             val password = binding.passwordEditText.text.toString()
+
+            var isValid = true
+
+            binding.nameEditText.error = null
+            binding.emailEditText.error = null
+            binding.passwordEditText.error = null
 
             if (name.isEmpty()) {
                 binding.nameEditText.error = "Nama tidak boleh kosong"
-            }
-            if (email.isEmpty()) {
-                binding.emailEditText.error = "Email tidak boleh kosong"
-            }
-            if (password.isEmpty()) {
-                binding.passwordEditText.error = "Password tidak boleh kosong"
+                isValid = false
             }
 
-            if (binding.nameEditText.error != null || binding.emailEditText.error != null || binding.passwordEditText.error != null || name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty()) {
+                binding.emailEditText.error = "Email tidak boleh kosong"
+                isValid = false
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.emailEditText.error = "Format email tidak valid (contoh: user@example.com)"
+                isValid = false
+            }
+
+            if (password.isEmpty()) {
+                binding.passwordEditText.error = "Password tidak boleh kosong"
+                isValid = false
+            } else if (password.length < 8) {
+                binding.passwordEditText.error = "Password minimal 8 karakter"
+                isValid = false
+            }
+
+            if (!isValid) {
                 Toast.makeText(this, "Perbaiki kesalahan input sebelum mendaftar", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -90,7 +107,7 @@ class SignupActivity : AppCompatActivity() {
                 }
                 is Result.Error -> {
                     showLoading(false)
-                    Toast.makeText(this, "Pendaftaran gagal: ${result.error}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Pendaftaran gagal: ${result.error}. Pastikan data valid dan email belum terdaftar.", Toast.LENGTH_LONG).show()
                 }
             }
         }
