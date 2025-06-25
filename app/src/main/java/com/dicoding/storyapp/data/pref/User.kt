@@ -1,5 +1,9 @@
 package com.dicoding.storyapp.data.pref
 
-class User {
-
-}
+data class User(
+    val token: String,
+    val isLogin: Boolean,
+    val userId: String,
+    val name: String,
+    val email: String
+)
