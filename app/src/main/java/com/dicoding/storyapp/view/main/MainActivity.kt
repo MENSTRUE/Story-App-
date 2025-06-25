@@ -1,80 +1,67 @@
 package com.dicoding.storyapp.view.main
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.activity.viewModels
+import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.storyapp.R
 import com.dicoding.storyapp.databinding.ActivityMainBinding
-import com.dicoding.storyapp.view.welcome.WelcomeActivity
+import com.dicoding.storyapp.view.addstory.AddStoryActivity
+import com.dicoding.storyapp.view.liststory.ListStoryFragment
+import com.dicoding.storyapp.view.login.LoginActivity
+import com.dicoding.storyapp.viewmodel.AuthViewModel
 import com.dicoding.storyapp.viewmodel.MainViewModel
 import com.dicoding.storyapp.viewmodel.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
-    private val viewModel by viewModels<MainViewModel> {
-        ViewModelFactory.getInstance(this)
-    }
+
     private lateinit var binding: ActivityMainBinding
+    private lateinit var authViewModel: AuthViewModel
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var toggle: ActionBarDrawerToggle
+    private var userToken: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel.getSession().observe(this) { user ->
+        setupView()
+
+        val factory = ViewModelFactory.getInstance(this)
+        authViewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
+        mainViewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
+
+        setupDrawer()
+
+        authViewModel.getSession().observe(this) { user ->
             if (!user.isLogin) {
-                startActivity(Intent(this, WelcomeActivity::class.java))
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
                 finish()
+            } else {
+                userToken = user.token
+                loadListStoryFragment()
             }
         }
 
-        setupView()
         setupAction()
-        playAnimation()
     }
 
-    private fun playAnimation() {
-        ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {
-            duration = 6000
-            repeatCount = ObjectAnimator.INFINITE
-            repeatMode = ObjectAnimator.REVERSE
-        }.start()
-
-        val logodicoding =
-            ObjectAnimator.ofFloat(binding.imageView, View.ALPHA, 1f).apply { duration= 500 }
-        val Name = ObjectAnimator.ofFloat(binding.nameTextView, View.ALPHA, 1f).apply { duration= 500 }
-        val message = ObjectAnimator.ofFloat(binding.messageTextView, View.ALPHA, 1f). apply { duration= 500 }
-        val btnLogout = ObjectAnimator.ofFloat(binding.logoutButton, View.ALPHA, 1f). apply { duration= 500 }
-
-        // Daftar view yang akan dianimasikan ALPHA
-        val alphaAnimations = listOf(
-            binding.imageView,
-            binding.nameTextView,
-            binding.messageTextView,
-            binding.logoutButton
-
-        ).map { view ->
-            ObjectAnimator.ofFloat(view, View.ALPHA, 1f).apply {
-                duration = 100
-            }
-        }
-
-        AnimatorSet().apply {
-            playSequentially(
-
-                logodicoding,
-                Name,
-                message,
-                btnLogout
-
-            )
-            startDelay = 100
-            start()
+    override fun onResume() {
+        super.onResume()
+        if (userToken.isNotEmpty()) {
+            mainViewModel.getStories(userToken)
         }
     }
 
@@ -88,13 +75,71 @@ class MainActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
-        supportActionBar?.hide()
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 
-    private fun setupAction() {
-        binding.logoutButton.setOnClickListener {
-            viewModel.logout()
+    private fun setupDrawer() {
+        toggle = ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.app_name, R.string.app_name)
+        binding.drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        binding.navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_list_story -> {
+                    loadListStoryFragment()
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+                R.id.nav_add_story -> {
+                    val intent = Intent(this, AddStoryActivity::class.java)
+                    startActivity(intent)
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+                R.id.nav_logout -> {
+                    authViewModel.logout()
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+                R.id.nav_language_settings -> {
+                    startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
+            }
+            true
         }
     }
 
+    private fun loadListStoryFragment() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment !is ListStoryFragment) {
+            val fragment = ListStoryFragment()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit()
+        }
+    }
+
+    fun getUserToken(): String {
+        return userToken
+    }
+
+    private fun setupAction() {
+    }
+
+    private fun setupRecyclerView() {
+    }
+
+    private fun observeStories() {
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        Toast.makeText(this, if (isLoading) "Memuat cerita..." else "Selesai memuat.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (toggle.onOptionsItemSelected(item)) {
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
 }

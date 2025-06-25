@@ -5,19 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.data.UserRepository
 import com.dicoding.storyapp.data.di.Injection
-import com.dicoding.storyapp.view.login.LoginViewModel
 
 class ViewModelFactory(private val repository: UserRepository) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
-            modelClass.isAssignableFrom(MainViewModel::class.java) -> {
-                MainViewModel(repository) as T
-            }
-            modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
-                LoginViewModel(repository) as T
-            }
+            modelClass.isAssignableFrom(AuthViewModel::class.java) -> AuthViewModel(repository) as T
+            modelClass.isAssignableFrom(MainViewModel::class.java) -> MainViewModel(repository) as T
+            modelClass.isAssignableFrom(AddStoryViewModel::class.java) -> AddStoryViewModel(repository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
     }
@@ -25,14 +21,13 @@ class ViewModelFactory(private val repository: UserRepository) : ViewModelProvid
     companion object {
         @Volatile
         private var INSTANCE: ViewModelFactory? = null
-        @JvmStatic
+
         fun getInstance(context: Context): ViewModelFactory {
-            if (INSTANCE == null) {
-                synchronized(ViewModelFactory::class.java) {
-                    INSTANCE = ViewModelFactory(Injection.provideRepository(context))
-                }
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: ViewModelFactory(
+                    Injection.provideRepository(context)
+                ).also { INSTANCE = it }
             }
-            return INSTANCE as ViewModelFactory
         }
     }
 }

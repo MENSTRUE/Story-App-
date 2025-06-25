@@ -2,6 +2,7 @@ package com.dicoding.storyapp.data.remote.retrofit
 
 import com.dicoding.storyapp.data.remote.response.AddStoryResponse
 import com.dicoding.storyapp.data.remote.response.LoginResponse
+import com.dicoding.storyapp.data.remote.response.RegisterResponse
 import com.dicoding.storyapp.data.remote.response.StoryResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody

@@ -19,7 +19,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
     private val IS_LOGIN_KEY = booleanPreferencesKey("is_login")
     private val USER_ID_KEY = stringPreferencesKey("user_id")
     private val USER_NAME_KEY = stringPreferencesKey("user_name")
-    private val EMAIL_KEY = stringPreferencesKey("email") // Menambahkan kunci untuk email
+    private val EMAIL_KEY = stringPreferencesKey("email")
 
     fun getUser(): Flow<User> {
         return dataStore.data.map { preferences ->
@@ -28,7 +28,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
                 preferences[IS_LOGIN_KEY] ?: false,
                 preferences[USER_ID_KEY] ?: "",
                 preferences[USER_NAME_KEY] ?: "",
-                preferences[EMAIL_KEY] ?: "" // Mengambil email
+                preferences[EMAIL_KEY] ?: ""
             )
         }
     }
@@ -39,7 +39,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             preferences[IS_LOGIN_KEY] = user.isLogin
             preferences[USER_ID_KEY] = user.userId
             preferences[USER_NAME_KEY] = user.name
-            preferences[EMAIL_KEY] = user.email // Menyimpan email
+            preferences[EMAIL_KEY] = user.email
         }
     }
 

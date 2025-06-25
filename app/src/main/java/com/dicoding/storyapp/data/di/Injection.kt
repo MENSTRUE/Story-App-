@@ -7,7 +7,7 @@ import com.dicoding.storyapp.data.pref.dataStore
 
 object Injection {
     fun provideRepository(context: Context): UserRepository {
-        val pref = UserPreference.getInstance(context.dataStore)
-        return UserRepository.getInstance(pref)
+        val userPreference = UserPreference.getInstance(context.dataStore)
+        return UserRepository.getInstance(userPreference)
     }
 }

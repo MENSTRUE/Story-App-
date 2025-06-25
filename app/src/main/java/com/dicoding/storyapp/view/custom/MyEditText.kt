@@ -25,11 +25,10 @@ class MyEditText : TextInputEditText {
     private fun init() {
         addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // Do nothing
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // Validasi password
+
                 if (inputType == (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
                     inputType == (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) ||
                     inputType == (InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD)) {
@@ -39,7 +38,7 @@ class MyEditText : TextInputEditText {
                         error = null
                     }
                 }
-                // Validasi email
+
                 if (inputType == (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)) {
                     if (!android.util.Patterns.EMAIL_ADDRESS.matcher(s.toString()).matches()) {
                         error = "Format email tidak valid"
@@ -50,13 +49,13 @@ class MyEditText : TextInputEditText {
             }
 
             override fun afterTextChanged(s: Editable) {
-                // Do nothing
+
             }
         })
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // Opsional: Kustomisasi gambar atau background
+
     }
 }

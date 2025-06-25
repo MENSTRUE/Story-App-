@@ -8,13 +8,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiConfig {
     companion object {
-        fun getApiService(token: String? = null): ApiService { // Token bisa null untuk register/login
+        fun getApiService(token: String? = null): ApiService {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
 
             val client = OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .apply {
-                    if (token != null) { // Tambahkan interceptor otorisasi jika token tersedia
+                    if (token != null) {
                         val authInterceptor = Interceptor { chain ->
                             val req = chain.request()
                             val requestHeaders = req.newBuilder()

@@ -2,9 +2,9 @@ package com.dicoding.storyapp.data.remote.response
 
 import com.google.gson.annotations.SerializedName
 
-data class ErrorResponse(
+data class RegisterResponse(
     @field:SerializedName("error")
-    val error: Boolean? = null,
+    val error: Boolean,
     @field:SerializedName("message")
-    val message: String? = null
+    val message: String
 )
