@@ -17,7 +17,7 @@ import com.dicoding.storyapp.R
 import com.dicoding.storyapp.databinding.ActivityMainBinding
 import com.dicoding.storyapp.view.addstory.AddStoryActivity
 import com.dicoding.storyapp.view.liststory.ListStoryFragment
-import com.dicoding.storyapp.view.login.LoginActivity
+import com.dicoding.storyapp.view.welcome.WelcomeActivity
 import com.dicoding.storyapp.viewmodel.AuthViewModel
 import com.dicoding.storyapp.viewmodel.MainViewModel
 import com.dicoding.storyapp.viewmodel.ViewModelFactory
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         authViewModel.getSession().observe(this) { user ->
             if (!user.isLogin) {
-                val intent = Intent(this, LoginActivity::class.java)
+                val intent = Intent(this, WelcomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
                 finish()
