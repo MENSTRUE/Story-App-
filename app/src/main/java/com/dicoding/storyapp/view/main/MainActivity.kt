@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setupAction()
+        setupAction() // setupAction dipanggil di sini
     }
 
     override fun onResume() {
@@ -128,7 +128,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupAction() {
-
+        binding.fabAddStory.setOnClickListener {
+            val intent = Intent(this, AddStoryActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupRecyclerView() {
