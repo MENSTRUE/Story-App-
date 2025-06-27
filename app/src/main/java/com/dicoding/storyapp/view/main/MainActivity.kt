@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.MenuItem
-import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
@@ -161,20 +160,12 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.getStories(userToken)
         }
 
-        mainViewModel.isLoading.observe(this) { isLoading ->
-            showLoading(isLoading)
-        }
 
         mainViewModel.toastText.observe(this) { toastText ->
             toastText.getContentIfNotHandled()?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        Toast.makeText(this, if (isLoading) "Memuat cerita..." else "Selesai memuat.", Toast.LENGTH_SHORT).show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
