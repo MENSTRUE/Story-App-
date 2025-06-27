@@ -9,6 +9,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -29,6 +30,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainViewModel: MainViewModel
     private lateinit var toggle: ActionBarDrawerToggle
     private var userToken: String = ""
+
+    private val addStoryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            loadListStoryFragment()
+            binding.navView.setCheckedItem(R.id.nav_list_story)
+            Toast.makeText(this, "Cerita berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,18 +67,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setupAction() // setupAction dipanggil di sini
+        setupAction()
     }
 
     override fun onResume() {
         super.onResume()
-        if (userToken.isNotEmpty()) {
-            mainViewModel.getStories(userToken)
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment is ListStoryFragment) {
+            binding.navView.setCheckedItem(R.id.nav_list_story)
+            if (userToken.isNotEmpty()) {
+                mainViewModel.getStories(userToken)
+            }
         }
     }
 
     private fun setupView() {
-        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.hide(WindowInsets.Type.statusBars())
         } else {
@@ -90,11 +104,13 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_list_story -> {
                     loadListStoryFragment()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    menuItem.isChecked = true
                 }
                 R.id.nav_add_story -> {
                     val intent = Intent(this, AddStoryActivity::class.java)
-                    startActivity(intent)
+                    addStoryLauncher.launch(intent)
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    false
                 }
                 R.id.nav_logout -> {
                     authViewModel.logout()
@@ -107,10 +123,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_language_settings -> {
                     startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    false
                 }
             }
             true
         }
+        binding.navView.setCheckedItem(R.id.nav_list_story)
     }
 
     private fun loadListStoryFragment() {
@@ -130,7 +148,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupAction() {
         binding.fabAddStory.setOnClickListener {
             val intent = Intent(this, AddStoryActivity::class.java)
-            startActivity(intent)
+            addStoryLauncher.launch(intent)
         }
     }
 
