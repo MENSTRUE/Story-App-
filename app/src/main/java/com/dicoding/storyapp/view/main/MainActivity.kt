@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 userToken = user.token
                 loadListStoryFragment()
+                observeStories()
             }
         }
 
@@ -97,6 +98,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_logout -> {
                     authViewModel.logout()
+                    val intent = Intent(this, WelcomeActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
                 R.id.nav_language_settings -> {
@@ -123,12 +128,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupAction() {
+
     }
 
     private fun setupRecyclerView() {
+
     }
 
     private fun observeStories() {
+        if (userToken.isNotEmpty()) {
+            mainViewModel.getStories(userToken)
+        }
+
+        mainViewModel.isLoading.observe(this) { isLoading ->
+            showLoading(isLoading)
+        }
+
+        mainViewModel.toastText.observe(this) { toastText ->
+            toastText.getContentIfNotHandled()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun showLoading(isLoading: Boolean) {
