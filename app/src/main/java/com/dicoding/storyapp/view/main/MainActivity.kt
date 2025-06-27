@@ -34,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            loadListStoryFragment()
+            if (userToken.isNotEmpty()) {
+                mainViewModel.getStories(userToken)
+            }
             binding.navView.setCheckedItem(R.id.nav_list_story)
             Toast.makeText(this, "Cerita berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
         }
@@ -159,7 +161,6 @@ class MainActivity : AppCompatActivity() {
         if (userToken.isNotEmpty()) {
             mainViewModel.getStories(userToken)
         }
-
 
         mainViewModel.toastText.observe(this) { toastText ->
             toastText.getContentIfNotHandled()?.let {

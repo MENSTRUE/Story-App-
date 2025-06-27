@@ -9,9 +9,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.databinding.ActivityAddStoryBinding
@@ -39,40 +38,21 @@ class AddStoryActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (!allPermissionsGranted()) {
-                Toast.makeText(
-                    this,
-                    "Tidak mendapatkan izin kamera.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                finish()
-            }
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Izin diberikan", Toast.LENGTH_SHORT).show()
+            startCamera()
+        } else {
+            Toast.makeText(this, "Izin ditolak", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        if (!allPermissionsGranted()) {
-            ActivityCompat.requestPermissions(
-                this,
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
-        }
 
         setupToolbar()
 
@@ -106,7 +86,13 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private fun setupAction() {
-        binding.btnCamera.setOnClickListener { startCamera() }
+        binding.btnCamera.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                startCamera()
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
         binding.btnGallery.setOnClickListener { startGallery() }
         binding.btnUpload.setOnClickListener { uploadStory() }
     }
@@ -121,9 +107,13 @@ class AddStoryActivity : AppCompatActivity() {
 
     private fun startCamera() {
         val photoFile: File = createCustomTempFile(application)
-        val photoUri: Uri = photoFile.toUri() // Pastikan toUri() sudah diimpor
+        val photoUri: Uri = FileProvider.getUriForFile(
+            this,
+            "${applicationContext.packageName}.fileprovider",
+            photoFile
+        )
         currentImageUri = photoUri
-        launcherIntentCamera.launch(photoUri) // Pass Uri ke launcher
+        launcherIntentCamera.launch(photoUri)
     }
 
     private val launcherIntentGallery = registerForActivityResult(
@@ -138,8 +128,6 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private fun startGallery() {
-        // PERBAIKAN DI SINI:
-        // ActivityResultContracts.GetContent() langsung menerima MIME type sebagai input
         launcherIntentGallery.launch("image/*")
     }
 

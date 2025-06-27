@@ -47,9 +47,8 @@
         android:layout_marginEnd="16dp"
         android:background="@drawable/image_placeholder_background"
         android:contentDescription="Story Preview Image"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_image_placeholder"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:scaleType="centerCrop"
+        android:src="@null" app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_new_story_title"
         tools:src="@tools:sample/avatars" />
