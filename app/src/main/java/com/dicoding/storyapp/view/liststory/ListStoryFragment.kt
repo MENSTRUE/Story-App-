@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.data.remote.response.ListStoryItem
 import com.dicoding.storyapp.databinding.FragmentListStoryBinding
 import com.dicoding.storyapp.view.addstory.AddStoryActivity
+import com.dicoding.storyapp.view.detail.DetailStoryActivity
 import com.dicoding.storyapp.view.main.MainActivity
 import com.dicoding.storyapp.view.main.StoryAdapter
 import com.dicoding.storyapp.viewmodel.MainViewModel
@@ -38,7 +40,7 @@ class ListStoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val factory = ViewModelFactory.getInstance(requireContext())
-        mainViewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
+        mainViewModel = ViewModelProvider(requireActivity(), factory)[MainViewModel::class.java]
 
         setupRecyclerView()
         setupAction()
@@ -59,8 +61,13 @@ class ListStoryFragment : Fragment() {
         binding.rvStories.adapter = storyAdapter
 
         storyAdapter.setOnItemClickCallback(object : StoryAdapter.OnItemClickCallback {
-            override fun onItemClicked(data: ListStoryItem, optionsCompat: androidx.core.app.ActivityOptionsCompat) {
-                Toast.makeText(requireContext(), "Clicked: ${data.name}", Toast.LENGTH_SHORT).show()
+            override fun onItemClicked(data: ListStoryItem, optionsCompat: ActivityOptionsCompat) {
+                val intent = Intent(requireContext(), DetailStoryActivity::class.java).apply {
+                    putExtra(DetailStoryActivity.EXTRA_STORY_PHOTO_URL, data.photoUrl)
+                    putExtra(DetailStoryActivity.EXTRA_STORY_NAME, data.name)
+                    putExtra(DetailStoryActivity.EXTRA_STORY_DESCRIPTION, data.description)
+                }
+                startActivity(intent, optionsCompat.toBundle())
             }
         })
     }
