@@ -75,11 +75,10 @@ class SignupActivity : AppCompatActivity() {
                 isValid = false
             }
 
-            if (password.isEmpty()) {
-                binding.passwordEditText.error = "Password tidak boleh kosong"
-                isValid = false
-            } else if (password.length < 8) {
-                binding.passwordEditText.error = "Password minimal 8 karakter"
+            if (binding.passwordEditText.error != null || password.isEmpty()) {
+                if(password.isEmpty()) {
+                    binding.passwordEditText.error = "Password tidak boleh kosong"
+                }
                 isValid = false
             }
 
@@ -92,6 +91,9 @@ class SignupActivity : AppCompatActivity() {
         }
 
         binding.loginText.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
             finish()
         }
 
