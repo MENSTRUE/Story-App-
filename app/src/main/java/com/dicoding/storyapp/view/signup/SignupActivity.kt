@@ -2,6 +2,7 @@ package com.dicoding.storyapp.view.signup
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.databinding.ActivitySignupBinding
+import com.dicoding.storyapp.view.login.LoginActivity
 import com.dicoding.storyapp.viewmodel.AuthViewModel
 import com.dicoding.storyapp.viewmodel.ViewModelFactory
 
@@ -37,7 +39,6 @@ class SignupActivity : AppCompatActivity() {
     }
 
     private fun setupView() {
-        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.hide(WindowInsets.Type.statusBars())
         } else {
@@ -103,6 +104,9 @@ class SignupActivity : AppCompatActivity() {
                 is Result.Success -> {
                     showLoading(false)
                     Toast.makeText(this, result.data, Toast.LENGTH_LONG).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
                     finish()
                 }
                 is Result.Error -> {
