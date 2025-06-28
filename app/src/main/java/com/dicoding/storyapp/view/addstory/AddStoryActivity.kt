@@ -102,6 +102,11 @@ class AddStoryActivity : AppCompatActivity() {
     ) { isSuccess ->
         if (isSuccess) {
             showImage()
+        } else {
+            // PERBAIKAN DI SINI: Tangani jika pengguna membatalkan pengambilan gambar kamera
+            currentImageUri = null // Set URI menjadi null jika dibatalkan
+            binding.ivStoryPreview.setImageDrawable(null) // Bersihkan gambar preview
+            Toast.makeText(this, "Pengambilan gambar dibatalkan", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -123,6 +128,9 @@ class AddStoryActivity : AppCompatActivity() {
             currentImageUri = uri
             showImage()
         } else {
+            // PERBAIKAN DI SINI: Tangani jika pengguna membatalkan pemilihan gambar galeri
+            currentImageUri = null // Set URI menjadi null jika dibatalkan
+            binding.ivStoryPreview.setImageDrawable(null) // Bersihkan gambar preview
             Toast.makeText(this, "Tidak ada media yang dipilih", Toast.LENGTH_SHORT).show()
         }
     }
@@ -140,6 +148,7 @@ class AddStoryActivity : AppCompatActivity() {
 
     private fun uploadStory() {
         val imageUriToUpload = currentImageUri
+        // PERBAIKAN DI SINI: Pastikan ada gambar yang dipilih sebelum mencoba mengunggah
         imageUriToUpload?.let { uri ->
             val imageFile = uriToFile(uri, this).reduceFileImage()
             val description = binding.edAddDescription.text.toString().trim()
