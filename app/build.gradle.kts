@@ -1,8 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id ("kotlin-kapt") // For Room, Dagger/Hilt if used, or for @Parcelize
-    id ("kotlin-parcelize") // For Parcelable
+    id ("kotlin-kapt")
+    id ("kotlin-parcelize")
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -37,19 +38,20 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
 dependencies {
 
+    // Android KTX
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.ktx)
+
+    // Android UI
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 
     // DataStore (for session management)
     implementation(libs.androidx.datastore.preferences)
@@ -57,12 +59,11 @@ dependencies {
     // Lifecycle (ViewModel & LiveData)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.activity.ktx)
 
     // Retrofit for Networking
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
-    implementation (libs.logging.interceptor) // for logging network requests
+    implementation (libs.logging.interceptor)
 
     // Kotlin Coroutines
     implementation (libs.kotlinx.coroutines.core)
@@ -70,16 +71,41 @@ dependencies {
 
     // Glide for image loading
     implementation (libs.glide)
-    kapt ("com.github.bumptech.glide:compiler:4.16.0")
+    kapt (libs.glide.compiler)
 
-    // CameraX (Opsional, jika ingin menambahkan fitur kamera)
-     implementation (libs.androidx.camera.camera2)
-     implementation (libs.androidx.camera.lifecycle)
-     implementation (libs.androidx.camera.view)
+    // CameraX
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.androidx.camera.view)
 
-    // Testing (optional, but good practice)
-    testImplementation (libs.junit)
-    androidTestImplementation (libs.androidx.junit)
-    androidTestImplementation (libs.androidx.espresso.core)
+    // Navigation Component
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
+    // Google Maps and Location Services
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+
+    // Paging 3
+    implementation(libs.androidx.paging.runtime.ktx)
+
+    // Unit Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.androidx.paging.common.ktx)
+
+    // UI Testing / Instrumentation Testing
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.contrib)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.espresso.idling.resource)
+    androidTestImplementation(libs.okhttp3.mockwebserver)
+    androidTestImplementation (libs.accessibility.test.framework)
 }
