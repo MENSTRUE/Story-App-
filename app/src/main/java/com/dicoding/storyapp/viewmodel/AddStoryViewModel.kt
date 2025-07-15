@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.data.UserRepository
+import com.dicoding.storyapp.utils.EspressoIdlingResource
 import com.dicoding.utils.Event
 import kotlinx.coroutines.launch
 import java.io.File
@@ -22,6 +23,7 @@ class AddStoryViewModel(private val repository: UserRepository) : ViewModel() {
     val toastText: LiveData<Event<String>> = _toastText
 
     fun addStory(token: String, imageFile: File, description: String, lat: Double? = null, lon: Double? = null) {
+        EspressoIdlingResource.increment()
         _isLoading.value = true
         viewModelScope.launch {
             repository.uploadStory(token, imageFile, description, lat, lon).collect { result ->
@@ -32,10 +34,12 @@ class AddStoryViewModel(private val repository: UserRepository) : ViewModel() {
                     is Result.Success -> {
                         _isLoading.value = false
                         _toastText.value = Event(result.data)
+                        EspressoIdlingResource.decrement()
                     }
                     is Result.Error -> {
                         _isLoading.value = false
                         _toastText.value = Event(result.error)
+                        EspressoIdlingResource.decrement()
                     }
                 }
             }

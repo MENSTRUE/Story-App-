@@ -1,7 +1,6 @@
 package com.dicoding.storyapp
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.AsyncPagingDataDiffer
 import androidx.paging.PagingData
@@ -15,15 +14,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.MockitoAnnotations
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
-@RunWith(MockitoJUnitRunner::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class MainViewModelTest {
 
     @get:Rule
@@ -37,6 +40,11 @@ class MainViewModelTest {
 
     private val dummyToken = "dummy_token"
 
+    @Before
+    fun setup() {
+        MockitoAnnotations.openMocks(this)
+    }
+
     @Test
     fun `when Get Stories Should Not Null and Return Data`() = runTest {
         val dummyStories = DataDummy.generateDummyStoryList()
@@ -44,7 +52,6 @@ class MainViewModelTest {
         val expectedStories = MutableLiveData<PagingData<ListStoryItem>>()
         expectedStories.value = data
 
-        // Memastikan userRepository mengembalikan data yang diharapkan
         Mockito.`when`(userRepository.getStoriesPaging(dummyToken)).thenReturn(expectedStories)
 
         val mainViewModel = MainViewModel(userRepository)
@@ -57,12 +64,9 @@ class MainViewModelTest {
         )
         differ.submitData(actualStories)
 
-        // Memastikan data tidak null
         Assert.assertNotNull(differ.snapshot())
-        // Memastikan jumlah data sesuai dengan yang diharapkan
         Assert.assertEquals(dummyStories.size, differ.snapshot().size)
-        // Memastikan data pertama yang dikembalikan sesuai
-        Assert.assertEquals(dummyStories[0].id, differ.snapshot().items[0].id)
+        Assert.assertEquals(dummyStories[0], differ.snapshot().items[0])
     }
 
     @Test
@@ -83,13 +87,10 @@ class MainViewModelTest {
         )
         differ.submitData(actualStories)
 
-        // Memastikan jumlah data yang dikembalikan nol
         Assert.assertEquals(0, differ.snapshot().size)
     }
 }
 
-// Utilitas untuk menghasilkan snapshot PagingData untuk pengujian
-// Kita tidak perlu mengimplementasikan PagingSource lengkap di sini jika hanya digunakan untuk snapshot.
 class StoryPagingSource : PagingSource<Int, ListStoryItem>() {
     companion object {
         fun snapshot(items: List<ListStoryItem>): PagingData<ListStoryItem> {
@@ -107,7 +108,6 @@ class StoryPagingSource : PagingSource<Int, ListStoryItem>() {
 }
 
 
-// Callback untuk AsyncPagingDataDiffer
 val noopListUpdateCallback = object : ListUpdateCallback {
     override fun onInserted(position: Int, count: Int) {}
     override fun onRemoved(position: Int, count: Int) {}

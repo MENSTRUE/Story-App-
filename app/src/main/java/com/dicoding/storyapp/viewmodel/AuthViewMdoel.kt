@@ -9,8 +9,8 @@ import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.data.UserRepository
 import com.dicoding.storyapp.data.pref.User
 import com.dicoding.storyapp.data.remote.response.LoginResult
+import com.dicoding.storyapp.utils.EspressoIdlingResource
 import kotlinx.coroutines.launch
-
 
 class AuthViewModel(private val repository: UserRepository) : ViewModel() {
 
@@ -20,15 +20,25 @@ class AuthViewModel(private val repository: UserRepository) : ViewModel() {
     private val _registerResult = MutableLiveData<Result<String>>()
     val registerResult: LiveData<Result<String>> = _registerResult
 
-
     fun getSession(): LiveData<User> {
         return repository.getSession().asLiveData()
     }
 
     fun login(email: String, password: String) {
+        EspressoIdlingResource.increment()
         viewModelScope.launch {
             repository.login(email, password).collect { result ->
                 _loginResult.value = result
+
+                when (result) {
+                    is Result.Loading -> {}
+                    is Result.Success -> {
+                        EspressoIdlingResource.decrement()
+                    }
+                    is Result.Error -> {
+                        EspressoIdlingResource.decrement()
+                    }
+                }
             }
         }
     }

@@ -17,15 +17,14 @@ import com.dicoding.storyapp.R
 import com.dicoding.storyapp.databinding.ActivityMainBinding
 import com.dicoding.storyapp.view.addstory.AddStoryActivity
 import com.dicoding.storyapp.view.liststory.ListStoryFragment
+import com.dicoding.storyapp.view.map.MapsActivity
 import com.dicoding.storyapp.view.welcome.WelcomeActivity
-import com.dicoding.storyapp.viewmodel.AuthViewModel
 import com.dicoding.storyapp.viewmodel.MainViewModel
 import com.dicoding.storyapp.viewmodel.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var authViewModel: AuthViewModel
     private lateinit var mainViewModel: MainViewModel
     private lateinit var toggle: ActionBarDrawerToggle
     private var userToken: String = ""
@@ -34,10 +33,6 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            if (userToken.isNotEmpty()) {
-                mainViewModel.getStories(userToken)
-            }
-            binding.navView.setCheckedItem(R.id.nav_list_story)
             Toast.makeText(this, "Cerita berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -50,12 +45,11 @@ class MainActivity : AppCompatActivity() {
         setupView()
 
         val factory = ViewModelFactory.getInstance(this)
-        authViewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
         mainViewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
 
         setupDrawer()
 
-        authViewModel.getSession().observe(this) { user ->
+        mainViewModel.getSession().observe(this) { user ->
             if (!user.isLogin) {
                 val intent = Intent(this, WelcomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -64,7 +58,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 userToken = user.token
                 loadListStoryFragment()
-                observeStories()
             }
         }
 
@@ -73,12 +66,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        if (currentFragment is ListStoryFragment) {
-            binding.navView.setCheckedItem(R.id.nav_list_story)
-            if (userToken.isNotEmpty()) {
-                mainViewModel.getStories(userToken)
-            }
+        if (userToken.isNotEmpty()) {
+            loadListStoryFragment()
         }
     }
 
@@ -105,29 +94,31 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_list_story -> {
                     loadListStoryFragment()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    menuItem.isChecked = true
+                    true
+                }
+                R.id.nav_maps -> {
+                    val intent = Intent(this, MapsActivity::class.java)
+                    startActivity(intent)
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    true
                 }
                 R.id.nav_add_story -> {
                     val intent = Intent(this, AddStoryActivity::class.java)
                     addStoryLauncher.launch(intent)
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    false
+                    true
                 }
                 R.id.nav_logout -> {
-                    authViewModel.logout()
-                    val intent = Intent(this, WelcomeActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivity(intent)
-                    finish()
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    mainViewModel.logout()
+                    true
                 }
                 R.id.nav_language_settings -> {
                     startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    false
+                    true
                 }
+                else -> false
             }
-            true
         }
         binding.navView.setCheckedItem(R.id.nav_list_story)
     }
@@ -150,22 +141,6 @@ class MainActivity : AppCompatActivity() {
         binding.fabAddStory.setOnClickListener {
             val intent = Intent(this, AddStoryActivity::class.java)
             addStoryLauncher.launch(intent)
-        }
-    }
-
-    private fun setupRecyclerView() {
-
-    }
-
-    private fun observeStories() {
-        if (userToken.isNotEmpty()) {
-            mainViewModel.getStories(userToken)
-        }
-
-        mainViewModel.toastText.observe(this) { toastText ->
-            toastText.getContentIfNotHandled()?.let {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-            }
         }
     }
 

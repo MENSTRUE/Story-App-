@@ -33,7 +33,11 @@ androidx-test-runner = "1.6.1"
 androidx-test-rules = "1.6.1"
 androidx-espresso-idling-resource = "3.6.1"
 okhttp3-mockwebserver = "4.12.0" # Untuk MockWebServer
+robolectric = "4.12.2"
 secretsGradlePlugin = "2.0.0" # Untuk Google Maps Secrets Gradle Plugin
+room = "2.6.1"
+mockito-inline = "5.2.0"
+
 
 [libraries]
 accessibility-test-framework = { module = "com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework", version.ref = "accessibilityTestFramework" }
@@ -76,6 +80,14 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidx-test-rules" }
 androidx-espresso-idling-resource = { group = "androidx.test.espresso", name = "espresso-idling-resource", version.ref = "androidx-espresso-idling-resource" }
 okhttp3-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp3-mockwebserver" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito-inline" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+
 
 
 [plugins]

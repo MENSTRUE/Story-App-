@@ -3,20 +3,16 @@ package com.dicoding.storyapp.view.main
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.dicoding.storyapp.data.remote.response.ListStoryItem
 import com.dicoding.storyapp.databinding.ItemStoryBinding
 
-class StoryAdapter : ListAdapter<ListStoryItem, StoryAdapter.MyViewHolder>(DIFF_CALLBACK) {
-
-    private lateinit var onItemClickCallback: OnItemClickCallback
-
-    fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback) {
-        this.onItemClickCallback = onItemClickCallback
-    }
+class StoryAdapter(
+    private val onItemClick: (ListStoryItem, ActivityOptionsCompat) -> Unit
+) : PagingDataAdapter<ListStoryItem, StoryAdapter.MyViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding = ItemStoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -25,13 +21,19 @@ class StoryAdapter : ListAdapter<ListStoryItem, StoryAdapter.MyViewHolder>(DIFF_
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val story = getItem(position)
-        holder.bind(story)
-        holder.itemView.setOnClickListener { onItemClickCallback.onItemClicked(story, ActivityOptionsCompat.makeSceneTransitionAnimation(
-            holder.itemView.context as androidx.appcompat.app.AppCompatActivity,
-            androidx.core.util.Pair(holder.binding.ivItemPhoto, "story_photo"),
-            androidx.core.util.Pair(holder.binding.tvItemName, "story_name"),
-            androidx.core.util.Pair(holder.binding.tvItemDescriptionPreview, "story_description")
-        )) }
+        if (story != null) {
+            holder.bind(story)
+
+            holder.itemView.setOnClickListener {
+                val optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    holder.itemView.context as androidx.appcompat.app.AppCompatActivity,
+                    androidx.core.util.Pair(holder.binding.ivItemPhoto, "story_photo"),
+                    androidx.core.util.Pair(holder.binding.tvItemName, "story_name"),
+                    androidx.core.util.Pair(holder.binding.tvItemDescriptionPreview, "story_description")
+                )
+                onItemClick(story, optionsCompat)
+            }
+        }
     }
 
     class MyViewHolder(val binding: ItemStoryBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -42,10 +44,6 @@ class StoryAdapter : ListAdapter<ListStoryItem, StoryAdapter.MyViewHolder>(DIFF_
                 .into(binding.ivItemPhoto)
             binding.tvItemDescriptionPreview.text = story.description
         }
-    }
-
-    interface OnItemClickCallback {
-        fun onItemClicked(data: ListStoryItem, optionsCompat: ActivityOptionsCompat)
     }
 
     companion object {

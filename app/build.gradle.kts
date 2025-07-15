@@ -90,22 +90,37 @@ dependencies {
     // Paging 3
     implementation(libs.androidx.paging.runtime.ktx)
 
-    // Unit Testing
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+
+    // Room Paging
+    implementation(libs.androidx.room.paging)
+
+    // Unit Testing (testImplementation)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.androidx.paging.common.ktx)
 
-    // UI Testing / Instrumentation Testing
+    // UI Testing / Instrumentation Testing (androidTestImplementation)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.espresso.contrib)
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.androidx.espresso.idling.resource)
+
+    // Dipindahkan ke implementation untuk akses di main source set
+    implementation(libs.androidx.espresso.idling.resource)
+
     androidTestImplementation(libs.okhttp3.mockwebserver)
-    androidTestImplementation (libs.accessibility.test.framework)
+
+    // Tambahkan Robolectric
+    testImplementation(libs.robolectric) // Gunakan versi Robolectric yang stabil
+
 }

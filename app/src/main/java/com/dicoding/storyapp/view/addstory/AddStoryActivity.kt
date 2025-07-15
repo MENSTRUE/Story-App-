@@ -3,6 +3,7 @@ package com.dicoding.storyapp.view.addstory
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -21,6 +22,9 @@ import com.dicoding.storyapp.viewmodel.ViewModelFactory
 import com.dicoding.utils.createCustomTempFile
 import com.dicoding.utils.reduceFileImage
 import com.dicoding.utils.uriToFile
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
 class AddStoryActivity : AppCompatActivity() {
@@ -28,13 +32,13 @@ class AddStoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddStoryBinding
     private lateinit var addStoryViewModel: AddStoryViewModel
     private lateinit var authViewModel: AuthViewModel
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var currentImageUri: Uri? = null
-
     private var userToken: String = ""
+    private var lastKnownLocation: Location? = null
 
     companion object {
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val REQUEST_CODE_PERMISSIONS = 10
     }
 
@@ -42,10 +46,27 @@ class AddStoryActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(this, "Izin diberikan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Izin kamera diberikan", Toast.LENGTH_SHORT).show()
             startCamera()
         } else {
-            Toast.makeText(this, "Izin ditolak", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Izin kamera ditolak", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val requestLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false -> {
+                getLastLocation()
+            }
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false -> {
+                getLastLocation()
+            }
+            else -> {
+                binding.switchLocation.isChecked = false
+                Snackbar.make(binding.root, "Izin lokasi ditolak.", Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -55,6 +76,8 @@ class AddStoryActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupToolbar()
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val factory = ViewModelFactory.getInstance(this)
         addStoryViewModel = ViewModelProvider(this, factory)[AddStoryViewModel::class.java]
@@ -74,6 +97,7 @@ class AddStoryActivity : AppCompatActivity() {
 
         setupAction()
         observeViewModel()
+        setupLocationSwitch()
     }
 
     private fun setupToolbar() {
@@ -97,15 +121,60 @@ class AddStoryActivity : AppCompatActivity() {
         binding.btnUpload.setOnClickListener { uploadStory() }
     }
 
+    private fun setupLocationSwitch() {
+        binding.switchLocation.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                checkLocationPermissions()
+            } else {
+                lastKnownLocation = null
+                binding.tvLocationCoordinates.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun checkLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getLastLocation()
+        } else {
+            requestLocationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun getLastLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    lastKnownLocation = location
+                    binding.tvLocationCoordinates.text = "Lat: ${location.latitude}, Lon: ${location.longitude}"
+                    binding.tvLocationCoordinates.visibility = View.VISIBLE
+                    Toast.makeText(this, "Lokasi diperoleh: Lat ${location.latitude}, Lon ${location.longitude}", Toast.LENGTH_SHORT).show()
+                } else {
+                    lastKnownLocation = null
+                    binding.switchLocation.isChecked = false
+                    binding.tvLocationCoordinates.text = "Gagal mendapatkan lokasi"
+                    binding.tvLocationCoordinates.visibility = View.GONE
+                    Toast.makeText(this, "Lokasi tidak ditemukan.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { isSuccess ->
         if (isSuccess) {
             showImage()
         } else {
-            // PERBAIKAN DI SINI: Tangani jika pengguna membatalkan pengambilan gambar kamera
-            currentImageUri = null // Set URI menjadi null jika dibatalkan
-            binding.ivStoryPreview.setImageDrawable(null) // Bersihkan gambar preview
+            currentImageUri = null
+            binding.ivStoryPreview.setImageDrawable(null)
             Toast.makeText(this, "Pengambilan gambar dibatalkan", Toast.LENGTH_SHORT).show()
         }
     }
@@ -128,9 +197,8 @@ class AddStoryActivity : AppCompatActivity() {
             currentImageUri = uri
             showImage()
         } else {
-            // PERBAIKAN DI SINI: Tangani jika pengguna membatalkan pemilihan gambar galeri
-            currentImageUri = null // Set URI menjadi null jika dibatalkan
-            binding.ivStoryPreview.setImageDrawable(null) // Bersihkan gambar preview
+            currentImageUri = null
+            binding.ivStoryPreview.setImageDrawable(null)
             Toast.makeText(this, "Tidak ada media yang dipilih", Toast.LENGTH_SHORT).show()
         }
     }
@@ -148,21 +216,13 @@ class AddStoryActivity : AppCompatActivity() {
 
     private fun uploadStory() {
         val imageUriToUpload = currentImageUri
-        // PERBAIKAN DI SINI: Pastikan ada gambar yang dipilih sebelum mencoba mengunggah
+
         imageUriToUpload?.let { uri ->
             val imageFile = uriToFile(uri, this).reduceFileImage()
             val description = binding.edAddDescription.text.toString().trim()
 
-            var isValid = true
-
-            binding.edAddDescription.error = null
-
             if (description.isEmpty()) {
                 binding.edAddDescription.error = "Deskripsi tidak boleh kosong"
-                isValid = false
-            }
-
-            if (!isValid) {
                 Toast.makeText(this, "Perbaiki kesalahan input sebelum mengunggah", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -172,7 +232,10 @@ class AddStoryActivity : AppCompatActivity() {
                 return
             }
 
-            addStoryViewModel.addStory(userToken, imageFile, description)
+            val lat = if (binding.switchLocation.isChecked) lastKnownLocation?.latitude else null
+            val lon = if (binding.switchLocation.isChecked) lastKnownLocation?.longitude else null
+
+            addStoryViewModel.addStory(userToken, imageFile, description, lat, lon)
 
         } ?: Toast.makeText(this, "Silakan masukkan gambar terlebih dahulu", Toast.LENGTH_SHORT).show()
     }

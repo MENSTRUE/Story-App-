@@ -11,10 +11,12 @@ import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.Result
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
+import com.dicoding.storyapp.utils.EspressoIdlingResource
 import com.dicoding.storyapp.view.main.MainActivity
 import com.dicoding.storyapp.view.signup.SignupActivity
 import com.dicoding.storyapp.viewmodel.AuthViewModel
@@ -39,6 +41,7 @@ class LoginActivity : AppCompatActivity() {
 
         setupAction()
         playAnimation()
+        observeViewModel()
     }
 
     private fun setupView() {
@@ -85,19 +88,23 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            EspressoIdlingResource.increment()
             authViewModel.login(email, password)
         }
 
         binding.root.findViewById<TextView>(R.id.registerText)?.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }
+    }
 
-        authViewModel.loginResult.observe(this) { result ->
+    private fun observeViewModel() {
+        authViewModel.loginResult.observe(this, Observer { result ->
             when (result) {
                 is Result.Loading -> {
                     showLoading(true)
                 }
                 is Result.Success -> {
+                    EspressoIdlingResource.decrement()
                     showLoading(false)
                     Toast.makeText(this, "Login berhasil!", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
@@ -106,11 +113,13 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 }
                 is Result.Error -> {
+                    EspressoIdlingResource.decrement()
                     showLoading(false)
                     Toast.makeText(this, "Login gagal: ${result.error}. Periksa email dan password Anda.", Toast.LENGTH_LONG).show()
                 }
+                else -> {}
             }
-        }
+        })
     }
 
     private fun showLoading(isLoading: Boolean) {

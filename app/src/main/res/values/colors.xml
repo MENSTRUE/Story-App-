@@ -3,7 +3,13 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
     <color name="navy">#2D3D4F</color>
+
+    <color name="primaryColor">#2D3D4F</color>
+    <color name="primaryColorDark">#1E2C3A</color>
+    <color name="colorAccent">#F4511E</color> <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnSecondary">#000000</color>
+
+    <color name="mapMarkerColor">#FF3E00</color>
 
 </resources>

@@ -14,6 +14,7 @@ class ViewModelFactory(private val repository: UserRepository) : ViewModelProvid
             modelClass.isAssignableFrom(AuthViewModel::class.java) -> AuthViewModel(repository) as T
             modelClass.isAssignableFrom(MainViewModel::class.java) -> MainViewModel(repository) as T
             modelClass.isAssignableFrom(AddStoryViewModel::class.java) -> AddStoryViewModel(repository) as T
+            modelClass.isAssignableFrom(MapsViewModel::class.java) -> MapsViewModel(repository) as T // Menambahkan MapsViewModel
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
     }
